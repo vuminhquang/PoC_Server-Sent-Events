@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SSE Example</title>
+</head>
+<body>
+<h1>Server-Sent Events</h1>
+<div id="messages"></div>
+
+<script>
+	const source = new EventSource('http://localhost:5079/sse');
+
+	source.addEventListener('message', function(event) {
+		const data = event.data;
+		const messagesDiv = document.getElementById('messages');
+		const messageElement = document.createElement('p');
+		messageElement.textContent = data;
+		messagesDiv.appendChild(messageElement);
+	});
+
+	source.addEventListener('open', function(event) {
+		console.log('SSE connection opened');
+	});
+
+	source.addEventListener('error', function(event) {
+		console.error('SSE connection error:', event);
+	});
+</script>
+</body>
+</html>

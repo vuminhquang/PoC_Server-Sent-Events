@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorClient", "BlazorClient\BlazorClient.csproj", "{E2D6842D-D510-462D-B133-16430EE33415}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSEServer", "SSEServer\SSEServer.csproj", "{3AD0EAD1-AF47-4924-9C99-4854E77526DF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HtmlClient", "HtmlClient", "{FAED9E4F-1D07-42BE-A70B-A8C5E1F0DFEB}"
+	ProjectSection(SolutionItems) = preProject
+		HtmlClient\index.html = HtmlClient\index.html
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E2D6842D-D510-462D-B133-16430EE33415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2D6842D-D510-462D-B133-16430EE33415}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2D6842D-D510-462D-B133-16430EE33415}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2D6842D-D510-462D-B133-16430EE33415}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AD0EAD1-AF47-4924-9C99-4854E77526DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AD0EAD1-AF47-4924-9C99-4854E77526DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AD0EAD1-AF47-4924-9C99-4854E77526DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AD0EAD1-AF47-4924-9C99-4854E77526DF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

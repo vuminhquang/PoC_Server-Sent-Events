@@ -1,0 +1,30 @@
+using System.Runtime.CompilerServices;
+using FastEndpoints;
+
+namespace SSEServer;
+
+public class EventStream : EndpointWithoutRequest
+{
+    public override void Configure()
+    {
+        Get("event-stream");
+        AllowAnonymous();
+        Options(x => x.RequireCors(p => p.AllowAnyOrigin()));
+    }
+
+    public override async Task HandleAsync(CancellationToken ct)
+    {
+        
+        //simply provide any IAsyncEnumerable<T> as argument
+        await SendEventStreamAsync("my-event", GetDataStream(ct), ct);
+    }
+
+    private async IAsyncEnumerable<object> GetDataStream([EnumeratorCancellation] CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            await Task.Delay(1000, ct);
+            yield return new { guid = Guid.NewGuid() };
+        }
+    }
+}

@@ -1,0 +1,6 @@
+@SSEServer_HostAddress = http://localhost:5079
+
+GET {{SSEServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
