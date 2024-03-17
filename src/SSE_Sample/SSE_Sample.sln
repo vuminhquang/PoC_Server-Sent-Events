@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HtmlClient", "HtmlClient", 
 		HtmlClient\index.html = HtmlClient\index.html
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSEProxy", "SSEProxy\SSEProxy.csproj", "{E2110ACC-FB42-4FAE-93E8-0C8C6BD523A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,9 @@ Global
 		{3AD0EAD1-AF47-4924-9C99-4854E77526DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3AD0EAD1-AF47-4924-9C99-4854E77526DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AD0EAD1-AF47-4924-9C99-4854E77526DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2110ACC-FB42-4FAE-93E8-0C8C6BD523A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2110ACC-FB42-4FAE-93E8-0C8C6BD523A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2110ACC-FB42-4FAE-93E8-0C8C6BD523A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2110ACC-FB42-4FAE-93E8-0C8C6BD523A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,10 +1,14 @@
 using BlazorClient.Components;
+using BlazorClient.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<SSEService>();
 
 var app = builder.Build();
 
@@ -16,7 +20,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
