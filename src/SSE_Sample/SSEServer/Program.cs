@@ -42,9 +42,16 @@ app.MapGet("/sse", async context =>
     context.Response.Headers.Append("Content-Type", "text/event-stream");
     context.Response.Headers.Append("Cache-Control", "no-cache");
     context.Response.Headers.Append("Connection", "keep-alive");
+
+    // if api_key in the query is not '123', then return 401
+    // if (context.Request.Query["api_key"] != "123")
+    // {
+    //     context.Response.StatusCode = 401;
+    //     return;
+    // }
     
     await context.Response.Body.WriteAsync("data: Connected\n\n"u8.ToArray());
-
+    
     // merge the request's cancellation token with the global cancellation token
     var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, cts.Token).Token;
     
