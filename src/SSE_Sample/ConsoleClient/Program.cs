@@ -6,7 +6,8 @@ Console.WriteLine("Hello, World!");
 
 var cts = new CancellationTokenSource();
 
-using var sseReader = new SseReader("http://localhost:5079/sse");
+// using var sseReader = new SseReader("http://localhost:5079/sse");
+using var sseReader = new SseReader("http://localhost:5046/proxy/http://localhost:5079/sse");
 
 var readTask = ReadEventsAsync(sseReader, cts.Token);
 
