@@ -55,12 +55,35 @@ app.MapGet("/sse", async context =>
     // merge the request's cancellation token with the global cancellation token
     var cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, cts.Token).Token;
     
-    while (!cancellationToken.IsCancellationRequested)
+    // set to stop the connection after 30 seconds, using the merged cancellation token
+    // create new cancellation token which will be cancelled after 30 seconds
+    var timeoutCts = new CancellationTokenSource();
+    timeoutCts.CancelAfter(30000);
+    var timeoutToken = timeoutCts.Token;
+    
+    // create a linked token source with the merged cancellation token and the timeout token
+    var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutToken);
+    
+    while (!linkedTokenSource.IsCancellationRequested)
     {
         // Simulate sending messages every 5 seconds
         await context.Response.Body.WriteAsync(Encoding.UTF8.GetBytes($"data: {DateTime.Now}\n\n"));
-        await Task.Delay(2000, cancellationToken);
+        try
+        {
+            await Task.Delay(2000, linkedTokenSource.Token);
+
+        }
+        catch (TaskCanceledException)
+        {
+            // if the task is cancelled, then the loop is stopped
+            break;
+        }
     }
+    
+    // if the loop is stopped, then the connection is stopped
+    // send a message to the client
+    await context.Response.Body.WriteAsync(Encoding.UTF8.GetBytes("data: [DONE]\n\n"));
+    //context.Response.Body.Close();
 })
 .WithOpenApi();
 
