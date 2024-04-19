@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SSE Consumer (POST)</title>
+    <script src="EventSourceExtra.js"></script>
+</head>
+<body>
+<h1>SSE Consumer (POST)</h1>
+<div id="messages"></div>
+
+<script>
+  const messagesDiv = document.getElementById('messages');
+
+  function startSSE() {
+    const source = new EventSourceExtra('http://localhost:5079/sse', {
+      method: 'POST',
+      debug: true
+    });
+
+    //Support addEventListener
+    // source.addEventListener('message', function(event) {
+    //   const message = document.createElement('p');
+    //   message.textContent = 'Received message: ' + event.data;
+    //   messagesDiv.appendChild(message);
+    // });
+    //
+    // source.addEventListener('open', function(event) {
+    //   console.log('SSE connection opened');
+    // });
+    //
+    // source.addEventListener('error', function(event) {
+    //   console.error('SSE error:', event);
+    // });
+    //
+    // source.addEventListener('closed', function(event) {
+    //   console.log('SSE connection closed');
+    // });
+
+    
+    //Support on
+    source.on('message', function(data) {
+      const message = document.createElement('p');
+      message.textContent = 'Received message: ' + data;
+      messagesDiv.appendChild(message);
+    });
+
+    source.on('open', function() {
+      console.log('SSE connection opened');
+    });
+
+    source.on('error', function(error) {
+      console.error('SSE error:', error);
+    });
+
+    source.on('closed', function() {
+      console.log('SSE connection closed');
+    });
+
+    source.stream();
+  }
+
+  startSSE();
+</script>
+</body>
+</html>

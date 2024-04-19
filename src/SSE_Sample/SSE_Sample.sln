@@ -7,6 +7,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HtmlClient", "HtmlClient", "{FAED9E4F-1D07-42BE-A70B-A8C5E1F0DFEB}"
 	ProjectSection(SolutionItems) = preProject
 		HtmlClient\index.html = HtmlClient\index.html
+		HtmlClient\index_post.html = HtmlClient\index_post.html
+		HtmlClient\EventSourceExtra.js = HtmlClient\EventSourceExtra.js
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSEProxy", "SSEProxy\SSEProxy.csproj", "{E2110ACC-FB42-4FAE-93E8-0C8C6BD523A7}"
