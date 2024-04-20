@@ -2,36 +2,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ConsoleClient.SSE_Reader;
-    public enum ReadyState
-    {
-        Initializing = -1,
-        Connecting = 0,
-        Open = 1,
-        Closed = 2
-    }
 
-    public class CustomEventArgs : EventArgs
-    {
-        public string? Type { get; set; }
-        public string? Data { get; set; }
-        public string? Id { get; set; }
-        public int? Retry { get; set; }
-    }
-
-    public class StateChangedEventArgs : EventArgs
-    {
-        public ReadyState ReadyState { get; init; }
-    }
-
-    public record EventSourceExtraOptions
-    {
-        public Dictionary<string, string> Headers { get; init; } = new();
-        public string Payload { get; init; } = string.Empty;
-        public string Method { get; init; } = "GET"; // Default to GET unless a payload is provided
-        public bool Debug { get; init; }
-    }
-
-    public class EventSourceExtra : IAsyncEnumerable<CustomEventArgs>
+public class StandardEventSourceClient : IAsyncEnumerable<CustomEventArgs>
     {
         private readonly string _url;
         private readonly Dictionary<string, string> _headers;
@@ -46,7 +18,7 @@ namespace ConsoleClient.SSE_Reader;
         public event EventHandler<CustomEventArgs>? EventReceived;
         public event EventHandler<StateChangedEventArgs>? StateChanged;
 
-        public EventSourceExtra(string url, HttpClient httpClient, EventSourceExtraOptions? options = null)
+        public StandardEventSourceClient(string url, HttpClient httpClient, EventSourceExtraOptions? options = null)
         {
             _url = url;
             _httpClient = httpClient;

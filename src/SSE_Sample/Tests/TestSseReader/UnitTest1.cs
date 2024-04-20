@@ -7,10 +7,10 @@ using Moq.Protected;
 namespace TestSseReader
 {
     [TestFixture]
-    public class EventSourceExtraTests
+    public class StandardEventSourceClientTests
     {
         private Mock<HttpClient> _mockHttpClient;
-        private EventSourceExtra _eventSourceExtra;
+        private StandardEventSourceClient _standardEventSourceClient;
         private string _testUrl = "http://test.com";
         private EventSourceExtraOptions _options;
 
@@ -29,21 +29,21 @@ namespace TestSseReader
                 Debug = true
             };
             
-            _eventSourceExtra = new EventSourceExtra(_testUrl, _mockHttpClient.Object, _options);
+            _standardEventSourceClient = new StandardEventSourceClient(_testUrl, _mockHttpClient.Object, _options);
         }
         
         [Test]
         public void ShouldInvokeStateChangedEventOnStateChange()
         {
             var wasCalled = false;
-            _eventSourceExtra.StateChanged += (sender, args) =>
+            _standardEventSourceClient.StateChanged += (sender, args) =>
             {
                 wasCalled = true;
                 Assert.That(args.ReadyState, Is.EqualTo(ReadyState.Connecting));
             };
 
-            _eventSourceExtra.GetType().GetMethod("SetReadyState", BindingFlags.NonPublic | BindingFlags.Instance)
-                ?.Invoke(_eventSourceExtra, new object[] { ReadyState.Connecting });
+            _standardEventSourceClient.GetType().GetMethod("SetReadyState", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.Invoke(_standardEventSourceClient, new object[] { ReadyState.Connecting });
 
             Assert.That(wasCalled, Is.True);
         }
@@ -63,16 +63,16 @@ namespace TestSseReader
                 .ReturnsAsync(response);
 
             var client = new HttpClient(mockHttpMessageHandler.Object);
-            _eventSourceExtra = new EventSourceExtra(_testUrl, client, _options);
+            _standardEventSourceClient = new StandardEventSourceClient(_testUrl, client, _options);
 
             var eventReceived = false;
-            _eventSourceExtra.EventReceived += (sender, args) =>
+            _standardEventSourceClient.EventReceived += (sender, args) =>
             {
                 eventReceived = true;
                 Assert.That(args.Data, Is.EqualTo("{\"message\": \"Hello\"}"));
             };
 
-            await _eventSourceExtra.Stream(CancellationToken.None);
+            await _standardEventSourceClient.Stream(CancellationToken.None);
 
             Assert.That(eventReceived, Is.True);
         }

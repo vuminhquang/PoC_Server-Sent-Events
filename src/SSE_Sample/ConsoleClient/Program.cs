@@ -20,7 +20,7 @@ var options = new EventSourceExtraOptions
 using var httpClient = new HttpClient();
 
 // Assuming "http://example.com/stream" is your SSE provider
-var eventSource = new EventSourceExtra(url, httpClient, options);
+var eventSource = new StandardEventSourceClient(url, httpClient, options);
         
 // Subscribe to events
 eventSource.EventReceived += OnEventReceived;
