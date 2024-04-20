@@ -1,36 +1,51 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using ConsoleClient.SSE_Reader;
+using System.Net.Http;
 
-Console.WriteLine("Hello, World!");
+string url = "http://localhost:5079/sse";
 
-var cts = new CancellationTokenSource();
+Console.WriteLine("Starting SSE Client...");
 
-// using var sseReader = new SseReader("http://localhost:5079/sse");
-using var sseReader = new SseReader("http://localhost:5046/proxy/http://localhost:5079/sse");
-
-var readTask = ReadEventsAsync(sseReader, cts.Token);
-
-Console.CancelKeyPress += (sender, e) =>
+var options = new EventSourceExtraOptions
 {
-    e.Cancel = true;
-    cts.Cancel();
+    Headers = new Dictionary<string, string>
+    {
+        { "Accept", "text/event-stream" }
+    },
+    Debug = true,
+    Method = "POST"
 };
 
-await readTask;
+using var httpClient = new HttpClient();
+
+// Assuming "http://example.com/stream" is your SSE provider
+var eventSource = new EventSourceExtra(url, httpClient, options);
+        
+// Subscribe to events
+eventSource.EventReceived += OnEventReceived;
+eventSource.StateChanged += OnStateChanged;
+
+// Start streaming
+await eventSource.Stream();
+
+// Keep the console alive until the user decides to quit
+Console.WriteLine("Press any key to exit...");
+Console.ReadKey();
 return;
 
-static async Task ReadEventsAsync(SseReader sseReader, CancellationToken cancellationToken)
+static void OnEventReceived(object sender, CustomEventArgs e)
 {
-    try
+    Console.WriteLine($"Received Event: {e.Type}");
+    Console.WriteLine($"Data: {e.Data}");
+    Console.WriteLine($"ID: {e.Id}");
+    if (e.Retry.HasValue)
     {
-        await foreach (var eventData in sseReader.WithCancellation(cancellationToken))
-        {
-            Console.WriteLine(eventData);
-        }
+        Console.WriteLine($"Retry: {e.Retry.Value}");
     }
-    catch (OperationCanceledException)
-    {
-        Console.WriteLine("Reading events canceled.");
-    }
+}
+
+static void OnStateChanged(object sender, StateChangedEventArgs e)
+{
+    Console.WriteLine($"State Changed: {e.ReadyState}");
 }
