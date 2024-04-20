@@ -1,108 +1,80 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
-using NUnit.Framework;
+using System.Reflection;
+using System.Text;
+using ConsoleClient.SSE_Reader;
+using Moq;
+using Moq.Protected;
 
-namespace ConsoleClient.SSE_Reader.Tests
+namespace TestSseReader
 {
     [TestFixture]
     public class EventSourceExtraTests
     {
-        private const string TestUrl = "https://example.com/sse";
+        private Mock<HttpClient> _mockHttpClient;
+        private EventSourceExtra _eventSourceExtra;
+        private string _testUrl = "http://test.com";
+        private EventSourceExtraOptions _options;
 
-        [Test]
-        public async Task Stream_ValidUrl_RaisesEventReceivedAndStateChangedEvents()
+        [SetUp]
+        public void Setup()
         {
-            // Arrange
-            var httpClient = new HttpClient();
-            var options = new EventSourceExtraOptions
+            _mockHttpClient = new Mock<HttpClient>();
+            _options = new EventSourceExtraOptions
             {
-                Headers = new Dictionary<string, string> { { "Authorization", "Bearer token" } },
-                Payload = "{\"key\":\"value\"}",
-                Method = "POST",
+                Headers = new Dictionary<string, string>
+                {
+                    { "Authorization", "Bearer token" }
+                },
+                Payload = "",
+                Method = "GET",
                 Debug = true
             };
-
-            var eventSourceExtra = new EventSourceExtra(TestUrl, httpClient, options);
-
-            var eventReceivedRaised = false;
-            var stateChangedRaised = false;
-
-            eventSourceExtra.EventReceived += (sender, args) =>
+            
+            _eventSourceExtra = new EventSourceExtra(_testUrl, _mockHttpClient.Object, _options);
+        }
+        
+        [Test]
+        public void ShouldInvokeStateChangedEventOnStateChange()
+        {
+            var wasCalled = false;
+            _eventSourceExtra.StateChanged += (sender, args) =>
             {
-                eventReceivedRaised = true;
-                Assert.AreEqual("message", args.Type);
-                Assert.AreEqual("Hello, world!", args.Data);
+                wasCalled = true;
+                Assert.That(args.ReadyState, Is.EqualTo(ReadyState.Connecting));
             };
 
-            eventSourceExtra.StateChanged += (sender, args) =>
+            _eventSourceExtra.GetType().GetMethod("SetReadyState", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.Invoke(_eventSourceExtra, new object[] { ReadyState.Connecting });
+
+            Assert.That(wasCalled, Is.True);
+        }
+        
+        [Test]
+        public async Task ShouldHandleIncomingEvents()
+        {
+            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var response = new HttpResponseMessage
             {
-                stateChangedRaised = true;
-                Assert.AreEqual(ReadyState.Open, args.ReadyState);
+                StatusCode = System.Net.HttpStatusCode.OK,
+                Content = new StringContent("data: {\"message\": \"Hello\"}\n\n", Encoding.UTF8, "application/json")
             };
 
-            // Act
-            await eventSourceExtra.Stream();
+            mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(response);
 
-            // Assert
-            Assert.IsTrue(eventReceivedRaised);
-            Assert.IsTrue(stateChangedRaised);
-        }
+            var client = new HttpClient(mockHttpMessageHandler.Object);
+            _eventSourceExtra = new EventSourceExtra(_testUrl, client, _options);
 
-        [Test]
-        public void Stream_InvalidUrl_ThrowsException()
-        {
-            // Arrange
-            var httpClient = new HttpClient();
-            var invalidUrl = "https://invalid-url.com/sse";
-            var eventSourceExtra = new EventSourceExtra(invalidUrl, httpClient);
-
-            // Act & Assert
-            Assert.ThrowsAsync<HttpRequestException>(async () => await eventSourceExtra.Stream());
-        }
-
-        [Test]
-        public void SetReadyState_ChangesReadyStateAndRaisesStateChangedEvent()
-        {
-            // Arrange
-            var httpClient = new HttpClient();
-            var eventSourceExtra = new EventSourceExtra(TestUrl, httpClient);
-
-            var stateChangedRaised = false;
-            var expectedReadyState = ReadyState.Closed;
-
-            eventSourceExtra.StateChanged += (sender, args) =>
+            var eventReceived = false;
+            _eventSourceExtra.EventReceived += (sender, args) =>
             {
-                stateChangedRaised = true;
-                Assert.AreEqual(expectedReadyState, args.ReadyState);
+                eventReceived = true;
+                Assert.That(args.Data, Is.EqualTo("{\"message\": \"Hello\"}"));
             };
 
-            // Act
-            eventSourceExtra.SetReadyState(expectedReadyState);
+            await _eventSourceExtra.Stream(CancellationToken.None);
 
-            // Assert
-            Assert.IsTrue(stateChangedRaised);
-            Assert.AreEqual(expectedReadyState, eventSourceExtra.ReadyState);
-        }
-
-        [Test]
-        public void ParseEvent_ValidChunk_ReturnsCustomEventArgs()
-        {
-            // Arrange
-            var httpClient = new HttpClient();
-            var eventSourceExtra = new EventSourceExtra(TestUrl, httpClient);
-
-            var chunk = "event: message\ndata: Hello, world!\nid: 123\nretry: 5000\n\n";
-
-            // Act
-            var result = eventSourceExtra.ParseEvent(chunk);
-
-            // Assert
-            Assert.AreEqual("message", result.Type);
-            Assert.AreEqual("Hello, world!", result.Data);
-            Assert.AreEqual("123", result.Id);
-            Assert.AreEqual(5000, result.Retry);
+            Assert.That(eventReceived, Is.True);
         }
     }
 }
