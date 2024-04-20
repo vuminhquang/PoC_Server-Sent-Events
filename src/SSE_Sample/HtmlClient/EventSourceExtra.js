@@ -24,9 +24,7 @@ class EventSourceExtra {
     }
 
     addEventListener(type, listener) {
-        if (!this.listeners[type]) {
-            this.listeners[type] = [];
-        }
+        this.listeners[type] = this.listeners[type] || [];
         if (!this.listeners[type].includes(listener)) {
             this.listeners[type].push(listener);
         }
@@ -35,13 +33,11 @@ class EventSourceExtra {
     removeEventListener(type, listener) {
         if (!this.listeners[type]) return;
         this.listeners[type] = this.listeners[type].filter(l => l !== listener);
-        if (!this.listeners[type].length) delete this.listeners[type];
+        if (this.listeners[type].length === 0) delete this.listeners[type];
     }
 
     on(type, listener) {
-        if (!this.dataListeners[type]) {
-            this.dataListeners[type] = [];
-        }
+        this.dataListeners[type] = this.dataListeners[type] || [];
         if (!this.dataListeners[type].includes(listener)) {
             this.dataListeners[type].push(listener);
         }
@@ -53,7 +49,7 @@ class EventSourceExtra {
             delete this.dataListeners[type];
         } else {
             this.dataListeners[type] = this.dataListeners[type].filter(l => l !== listener);
-            if (!this.dataListeners[type].length) delete this.dataListeners[type];
+            if (this.dataListeners[type].length === 0) delete this.dataListeners[type];
         }
     }
 
@@ -64,9 +60,9 @@ class EventSourceExtra {
         if (typeof e.retry !== 'undefined') this.retry = e.retry;
         if (e.type === 'message' && e.data === '') return;
 
-        const onHandler = 'on' + e.type;
-        if (this[onHandler]) this[onHandler].call(this, e);
-        if (e.type === 'message' && this.ondata) this.ondata.call(this, e);
+        const onHandler = `on${e.type}`;
+        if (typeof this[onHandler] === 'function') this[onHandler](e);
+        if (e.type === 'message' && typeof this.ondata === 'function') this.ondata(e);
 
         const emitEvent = (listeners, eventData) => {
             if (!listeners) return;
@@ -120,7 +116,7 @@ class EventSourceExtra {
 
     _onStreamProgress() {
         if (!this.xhr || this.xhr.status !== 200) {
-            this._onStreamFailure({type: 'progress'});
+            this._onStreamFailure({ type: 'progress' });
             return;
         }
 
@@ -151,14 +147,14 @@ class EventSourceExtra {
     _parseEventChunk(chunk) {
         if (!chunk) return null;
 
-        const e = {id: null, retry: undefined, data: '', event: 'message'};
+        const e = { id: null, retry: undefined, data: '', event: 'message' };
         chunk.split(/\n|\r\n|\r/).forEach(line => {
-            line = line.trimRight();
+            line = line.trimEnd();
             const index = line.indexOf(this.FIELD_SEPARATOR);
             if (index <= 0 || !(line.substring(0, index) in e)) return;
 
             const field = line.substring(0, index);
-            const value = line.substring(index + 1).trimLeft();
+            const value = line.substring(index + 1).trimStart();
             e[field] = field === 'data' ? e[field] + value : value;
         });
 
